@@ -90,4 +90,4 @@ mise run serve   # http://localhost:8000
 | 真っ白なまま | index.html が `../boot.js` を読み込んでいない |
 | `Go is not defined` | `../wasm_exec.js` を読み込んでいない。パスが `wasm_exec.js` になっていないか |
 | 開いた直後だけキーが効かない | `../boot.js` を読み込んでいない。canvas にフォーカスが当たっていない |
-| クリック / タップの位置がずれる | Ebitengine の js バックエンドはポインタ位置に `clientX` / `clientY` をそのまま使うので、index.html のように canvas を画面中央へ寄せていると canvas の位置だけずれる。`internal/judgementdice/game/pointer_js.go` のように canvas の位置を引く |
+| クリック / タップの位置がずれる | Ebitengine の js バックエンドはポインタ位置に `clientX` / `clientY` をそのまま使うので、index.html のように canvas を画面中央へ寄せていると canvas の位置だけずれる。`internal/webpointer` の `Offset` を引く（`internal/judgementdice/game/input.go` が例）|

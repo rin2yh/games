@@ -30,13 +30,13 @@ func (j *Jenga) Reset() {
 	j.dice.Reset()
 }
 
-func (j *Jenga) Update(in input) {
+func (j *Jenga) Update(confirm bool) {
 	if j.phase != jengaIdle {
 		j.dice.Update()
 	}
 	switch j.phase {
 	case jengaIdle:
-		if in.confirm {
+		if confirm {
 			j.dice.Roll()
 			j.phase = jengaRolling
 		}
@@ -45,7 +45,7 @@ func (j *Jenga) Update(in input) {
 			j.phase = jengaJudgement
 		}
 	case jengaJudgement:
-		if in.confirm {
+		if confirm {
 			j.Reset()
 		}
 	}

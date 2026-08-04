@@ -1,60 +1,39 @@
 package game
 
-import "testing"
-
-func TestRectContains(t *testing.T) {
-	r := rect{x: 10, y: 20, w: 100, h: 40}
-	cases := []struct {
-		name string
-		x, y int
-		want bool
-	}{
-		{"左上の角", 10, 20, true},
-		{"真ん中", 60, 40, true},
-		{"右下の角は含まない", 110, 60, false},
-		{"右端の内側", 109, 59, true},
-		{"左に外れる", 9, 40, false},
-		{"上に外れる", 60, 19, false},
-	}
-	for _, c := range cases {
-		if got := r.contains(c.x, c.y); got != c.want {
-			t.Errorf("%s: contains(%d, %d) = %v, want %v", c.name, c.x, c.y, got, c.want)
-		}
-	}
-}
+import (
+	"image"
+	"testing"
+)
 
 func TestModeAt(t *testing.T) {
 	cases := []struct {
 		name string
-		x, y int
-		want int
+		y    int
+		want scene
 	}{
-		{"1 行目", 320, int(titleItemY[0]), 1},
-		{"2 行目", 10, int(titleItemY[1]), 2},
-		{"3 行目", 630, int(titleItemY[2]), 3},
-		{"選択肢の上", 320, 100, 0},
-		{"選択肢の間", 320, 220, 0},
-		{"選択肢の下", 320, 400, 0},
+		{"1 行目", int(titleItems[0].y), sceneEffect},
+		{"2 行目", int(titleItems[1].y), sceneDuel},
+		{"3 行目", int(titleItems[2].y), sceneJenga},
+		{"選択肢の上", 100, sceneTitle},
+		{"選択肢の間", 220, sceneTitle},
+		{"選択肢の下", 400, sceneTitle},
 	}
 	for _, c := range cases {
-		if got := modeAt(c.x, c.y); got != c.want {
-			t.Errorf("%s: modeAt(%d, %d) = %d, want %d", c.name, c.x, c.y, got, c.want)
+		if got := modeAt(c.y); got != c.want {
+			t.Errorf("%s: modeAt(%d) = %v, want %v", c.name, c.y, got, c.want)
 		}
 	}
 }
 
-// 「← タイトル」は画面内に収まっていて、かつ下端のヒント行と重ならない位置に
-// ある。ここがずれると、タップできる場所と見えている文字が食い違う。
-func TestBackRectIsOnScreen(t *testing.T) {
-	if backRect.x < 0 || backRect.y < 0 {
-		t.Errorf("backRect = %+v, 画面の外にはみ出している", backRect)
+// 「← タイトル」は画面内に収まっていて、かつ選択肢と重ならない位置にある。
+// ここがずれると、タップできる場所と見えている文字が食い違う。
+func TestBackRectFits(t *testing.T) {
+	if screen := image.Rect(0, 0, screenWidth, screenHeight); !backRect.In(screen) {
+		t.Errorf("backRect = %v が画面 %v からはみ出している", backRect, screen)
 	}
-	if backRect.x+backRect.w > screenWidth || backRect.y+backRect.h > screenHeight {
-		t.Errorf("backRect = %+v, 画面の外にはみ出している", backRect)
-	}
-	for i := range titleItemY {
-		if r := titleItemRect(i); r.y+r.h > backRect.y {
-			t.Errorf("titleItemRect(%d) = %+v が backRect = %+v と重なる", i, r, backRect)
+	for _, it := range titleItems {
+		if bottom := it.y + titleItemHeight/2; bottom > float64(backRect.Min.Y) {
+			t.Errorf("選択肢 %q の下端 %v が backRect %v と重なる", it.label, bottom, backRect)
 		}
 	}
 }

@@ -29,6 +29,8 @@ internal/judgementdice/game/ ゲームロジック（Dice / Duel / Jenga / Effec
 
 入力は `internal/judgementdice/game/input.go` でキーとポインタを `input` 型に
 まとめてから各シーンに渡している。シーン側はどちらで操作されたかを見ない。
+タイトルの選択肢は表示・キー・当たり判定を 1 つの表 (`titleItems`) から出して
+いるので、モードを足すならそこだけを触る。
 
 ## 実行
 

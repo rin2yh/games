@@ -49,44 +49,33 @@ func New() *Game {
 }
 
 func (g *Game) Update() error {
-	g.handle(readInput(g.scene))
+	g.handle(readInput())
 	return nil
 }
 
 // handle は 1 フレーム分の入力を今のシーンに適用する。入力の読み取り
 // (readInput) と分けてあるので、Ebitengine を起動せずにテストできる。
 func (g *Game) handle(in input) {
+	if in.back && g.scene != sceneTitle {
+		// 出るときに畳むので、今いるシーン以外はすでに初期状態にある。
+		g.dice.Reset()
+		g.duel.Reset()
+		g.jenga.Reset()
+		g.scene = sceneTitle
+		return
+	}
+
 	switch g.scene {
 	case sceneTitle:
-		switch in.mode {
-		case 1:
-			g.scene = sceneEffect
-		case 2:
-			g.scene = sceneDuel
-		case 3:
-			g.scene = sceneJenga
+		if in.mode != sceneTitle {
+			g.scene = in.mode
 		}
 	case sceneEffect:
-		if in.back {
-			g.dice.Reset()
-			g.scene = sceneTitle
-			return
-		}
 		g.updateEffect(in)
 	case sceneDuel:
-		if in.back {
-			g.duel.Reset()
-			g.scene = sceneTitle
-			return
-		}
-		g.duel.Update(in)
+		g.duel.Update(in.confirm)
 	case sceneJenga:
-		if in.back {
-			g.jenga.Reset()
-			g.scene = sceneTitle
-			return
-		}
-		g.jenga.Update(in)
+		g.jenga.Update(in.confirm)
 	}
 }
 
@@ -128,17 +117,18 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 func (g *Game) drawTitleScene(screen *ebiten.Image) {
 	drawText(screen, g.face, "ジャッジメントダイス", screenWidth/2, 80, titleColor)
-	// 選択肢の y は titleItemY（タップの当たり判定）と同じ順・同じ位置。
-	drawText(screen, g.face, "1: 遊戯王ジャッジメントダイス", screenWidth/2, titleItemY[0], textColor)
-	drawText(screen, g.face, "2: タンクトップ小隊のジャッジメントダイス", screenWidth/2, titleItemY[1], textColor)
-	drawText(screen, g.face, "3: タンクトップ小隊ジェンガモード", screenWidth/2, titleItemY[2], textColor)
+	for _, it := range titleItems {
+		drawText(screen, g.face, it.label, screenWidth/2, it.y, textColor)
+	}
 	drawText(screen, g.face, "1 / 2 / 3 キー、または選択肢をタップ", screenWidth/2, screenHeight-60, hintColor)
 }
 
 // drawBackButton は backRect の位置に「← タイトル」を描く。タップで戻れる
 // ことが見えていないと、キーの無い端末ではモードから出られない。
 func (g *Game) drawBackButton(screen *ebiten.Image) {
-	drawText(screen, g.face, "← タイトル", backRect.x+backRect.w/2, backRect.y+backRect.h/2, hintColor)
+	x := float64(backRect.Min.X+backRect.Max.X) / 2
+	y := float64(backRect.Min.Y+backRect.Max.Y) / 2
+	drawText(screen, g.face, "← タイトル", x, y, hintColor)
 }
 
 func (g *Game) drawEffectScene(screen *ebiten.Image) {

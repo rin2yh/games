@@ -35,14 +35,14 @@ func (d *Duel) Reset() {
 	d.player.Reset()
 }
 
-func (d *Duel) Update(in input) {
+func (d *Duel) Update(confirm bool) {
 	if d.phase != duelIdle {
 		d.cpu.Update()
 		d.player.Update()
 	}
 	switch d.phase {
 	case duelIdle:
-		if in.confirm {
+		if confirm {
 			d.cpu.Roll()
 			d.player.Roll()
 			d.phase = duelRolling
@@ -52,7 +52,7 @@ func (d *Duel) Update(in input) {
 			d.phase = duelJudgement
 		}
 	case duelJudgement:
-		if in.confirm {
+		if confirm {
 			d.Reset()
 		}
 	}

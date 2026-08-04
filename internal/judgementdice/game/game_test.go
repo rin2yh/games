@@ -19,21 +19,18 @@ func TestNew(t *testing.T) {
 }
 
 func TestHandleTitleSelectsMode(t *testing.T) {
-	cases := []struct {
-		mode int
-		want scene
-	}{
-		{1, sceneEffect},
-		{2, sceneDuel},
-		{3, sceneJenga},
-		{0, sceneTitle},
-	}
-	for _, c := range cases {
+	for _, it := range titleItems {
 		g := New()
-		g.handle(input{mode: c.mode})
-		if g.scene != c.want {
-			t.Errorf("mode %d: scene = %v, want %v", c.mode, g.scene, c.want)
+		g.handle(input{mode: it.mode})
+		if g.scene != it.mode {
+			t.Errorf("%q: scene = %v, want %v", it.label, g.scene, it.mode)
 		}
+	}
+
+	g := New()
+	g.handle(input{})
+	if g.scene != sceneTitle {
+		t.Errorf("未選択で scene = %v, want sceneTitle", g.scene)
 	}
 }
 
@@ -50,25 +47,21 @@ func TestHandleBackReturnsToTitle(t *testing.T) {
 
 // タップは SPACE と同じ意味になる。キーの無い端末でも遊べることの確認。
 func TestHandleConfirmRollsDice(t *testing.T) {
-	g := New()
-	g.scene = sceneEffect
-	g.handle(input{confirm: true})
-	if g.dice.State() != stateRolling {
-		t.Errorf("dice.State() = %v, want stateRolling", g.dice.State())
+	cases := []struct {
+		scene   scene
+		rolling func(*Game) bool
+	}{
+		{sceneEffect, func(g *Game) bool { return g.dice.State() == stateRolling }},
+		{sceneDuel, func(g *Game) bool { return g.duel.phase == duelRolling }},
+		{sceneJenga, func(g *Game) bool { return g.jenga.phase == jengaRolling }},
 	}
-
-	g = New()
-	g.scene = sceneDuel
-	g.handle(input{confirm: true})
-	if g.duel.phase != duelRolling {
-		t.Errorf("duel.phase = %v, want duelRolling", g.duel.phase)
-	}
-
-	g = New()
-	g.scene = sceneJenga
-	g.handle(input{confirm: true})
-	if g.jenga.phase != jengaRolling {
-		t.Errorf("jenga.phase = %v, want jengaRolling", g.jenga.phase)
+	for _, c := range cases {
+		g := New()
+		g.scene = c.scene
+		g.handle(input{confirm: true})
+		if !c.rolling(g) {
+			t.Errorf("scene %v: confirm でダイスが回り出さない", c.scene)
+		}
 	}
 }
 
