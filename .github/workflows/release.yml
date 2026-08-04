@@ -3,6 +3,17 @@ name: Tag releases
 on:
   push:
     branches: [main]
+    # A version number here only means something to code that imports this
+    # repository, and dinosaur/ is the only part anyone can import. Editing a
+    # README, a workflow or a game's web page changes nothing for them, so
+    # opening a release PR for it is noise. An allow list rather than an
+    # ignore list: files added later default to not releasing.
+    #
+    # tagpr's own release PR edits dinosaur/game/version.go, so merging it
+    # still lands here and gets the tag pushed.
+    paths:
+      - 'dinosaur/**'
+      - '.tagpr'
 
 permissions: {}
 
