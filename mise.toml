@@ -2,15 +2,14 @@
 go = "1.25.6"
 tinygo = "0.41.1"
 
-[env]
-# Every game lands in web/<name>/game.wasm and shares one web/wasm_exec.js,
-# which is exactly the tree the Pages workflow publishes.
-GAMES = "dinosaur-game gopher-run judgement-dice"
-
+# web/<name>/ の一覧がゲームの一覧そのもの。ここを引くことで、ゲームを増やす
+# ときに名前を書き足す場所が web/<name>/index.html だけで済む。cmd/ を引くと
+# WASM にならない dinosaur-firmware まで拾ってしまう。
 [tasks.build]
 description = "全ゲームのデスクトップ向けバイナリを bin/ にビルド"
 run = """
-for g in $GAMES; do
+for d in web/*/; do
+  g=$(basename "$d")
   go build -o "bin/$g" "./cmd/$g"
 done
 """
@@ -18,7 +17,8 @@ done
 [tasks.build-web]
 description = "web/<game>/game.wasm に全ゲームの WASM をビルド"
 run = """
-for g in $GAMES; do
+for d in web/*/; do
+  g=$(basename "$d")
   GOOS=js GOARCH=wasm go build -o "web/$g/game.wasm" "./cmd/$g"
 done
 # install rather than cp: the copy in GOROOT is read-only, and cp would
@@ -33,7 +33,7 @@ run = "python3 -m http.server 8000 --directory web"
 
 [tasks.serve-game]
 description = "1 ゲームだけ wasmserve で配信（リロードで再ビルド）: GAME=dinosaur-game mise run serve-game"
-run = 'go tool wasmserve -http=:8000 "./cmd/${GAME:?GAME に dinosaur-game / gopher-run / judgement-dice のいずれかを指定}"'
+run = 'go tool wasmserve -http=:8000 "./cmd/${GAME:?GAME にゲーム名（web/ 配下のディレクトリ名）を指定}"'
 
 [tasks.test]
 description = "テストを実行"

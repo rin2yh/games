@@ -33,10 +33,12 @@ jobs:
 
       # Same as `mise run build-web`: every game becomes web/<name>/game.wasm
       # next to the index.html already committed there, so the whole web/
-      # tree is the site.
+      # tree is the site. The list of games is web/ itself, so adding one
+      # never means editing this workflow.
       - name: Build every game into web/
         run: |
-          for g in dinosaur-game gopher-run judgement-dice; do
+          for d in web/*/; do
+            g=$(basename "$d")
             GOOS=js GOARCH=wasm go build -o "web/$g/game.wasm" "./cmd/$g"
           done
           # install rather than cp: the copy in GOROOT is read-only, and cp

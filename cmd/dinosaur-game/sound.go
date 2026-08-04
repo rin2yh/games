@@ -3,8 +3,8 @@ package main
 import (
 	"github.com/hajimehoshi/ebiten/v2/audio"
 
-	"github.com/rin2yh/games/internal/dinosaur/beep"
-	"github.com/rin2yh/games/internal/dinosaur/game"
+	"github.com/rin2yh/games/dinosaur/beep"
+	"github.com/rin2yh/games/dinosaur/game"
 )
 
 // masterVolume is the one knob for how loud the game is; the gains on

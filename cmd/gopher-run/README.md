@@ -2,8 +2,6 @@
 
 Go と Ebitengine で作られた 2D エンドレスランナーゲーム。Web ブラウザのみ対応。
 
-公開先: https://rin2yh.github.io/games/gopher-run/
-
 ## 操作方法
 
 - Space / クリック / タッチ: ジャンプ

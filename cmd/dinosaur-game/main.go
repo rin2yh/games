@@ -11,7 +11,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 
-	"github.com/rin2yh/games/internal/dinosaur/game"
+	"github.com/rin2yh/games/dinosaur/game"
 )
 
 // bg is repeated as the page background in web/index.html; the canvas

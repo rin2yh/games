@@ -1,0 +1,10 @@
+# tagpr config, in git config format. Unset keys keep tagpr's defaults.
+[tagpr]
+	# Pinned against auto-detection. dinosaur/ is the one package here that
+	# is importable from outside the repo, so it is what a version number
+	# actually means to anyone but us.
+	versionFile = dinosaur/game/version.go
+	vPrefix = true
+	# Release notes stay in the release PR and the GitHub Release.
+	changelog = false
+	releaseBranch = main
