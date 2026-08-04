@@ -52,11 +52,7 @@
 <body>
   <a class="back" href="../">← Games</a>
   <script src="../wasm_exec.js"></script>
-  <script>
-    const go = new Go();
-    WebAssembly.instantiateStreaming(fetch("game.wasm"), go.importObject).then(result => {
-      go.run(result.instance);
-    });
-  </script>
+  <!-- game.wasm の読み込みと、canvas へのフォーカス当て。全ゲーム共通。 -->
+  <script src="../boot.js"></script>
 </body>
 </html>

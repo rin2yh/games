@@ -17,6 +17,8 @@ description: games リポジトリ (Go + Ebitengine を WebAssembly で GitHub P
 
 **WASM の出力名は `game.wasm` 固定、`wasm_exec.js` は `web/` に 1 つだけ。** どのゲームの index.html も `../wasm_exec.js` を参照する。ゲームごとに置くと同じファイルが複製されるだけなので置かない。
 
+**起動処理は `web/boot.js` に 1 つだけ。** `game.wasm` の読み込みと、生成された canvas へのフォーカス当てが入っている。Ebitengine の js バックエンドはキーイベントを canvas に登録するので、フォーカスが無いとページを開いた直後はキーが一切効かない（issue #1）。index.html 側に起動コードを書き直すとこのフォーカス処理が抜けるので、`../boot.js` を読むだけにする。
+
 ## 手順
 
 ### 1. ゲームロジックを `internal/<name>/` に置く
@@ -85,5 +87,6 @@ mise run serve   # http://localhost:8000
 | --- | --- |
 | ビルドされない | `web/<name>/` が無い。列挙元はここ |
 | 404 になる | `web/<name>/index.html` が無い、または `cmd/<name>` と名前が違う |
-| 真っ白なまま | index.html の fetch 先が `game.wasm` になっていない |
+| 真っ白なまま | index.html が `../boot.js` を読み込んでいない |
 | `Go is not defined` | `../wasm_exec.js` を読み込んでいない。パスが `wasm_exec.js` になっていないか |
+| 開いた直後だけキーが効かない | `../boot.js` を読み込んでいない。canvas にフォーカスが当たっていない |
