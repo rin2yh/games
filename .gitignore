@@ -37,7 +37,11 @@ go.work.sum
 # Editor/IDE
 .idea/
 .vscode/
-.claude/
+
+# Claude Code: skills under .claude/skills/ are part of the repo; only the
+# machine-local bits are ignored.
+.claude/settings.local.json
+.claude/.cc-writes/
 
 # Build artifacts (see mise.toml)
 bin/

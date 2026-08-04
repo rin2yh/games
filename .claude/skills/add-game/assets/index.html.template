@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>__TITLE__</title>
+  <meta name="description" content="__DESCRIPTION__">
+
+  <!-- OGP (Open Graph Protocol) -->
+  <meta property="og:title" content="__TITLE__">
+  <meta property="og:description" content="__DESCRIPTION__">
+  <meta property="og:type" content="website">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="__TITLE__">
+  <meta name="twitter:description" content="__DESCRIPTION__">
+  <style>
+    /* Ebitengine sizes its canvas from <body>, so the body *is* the game
+       area. Pin it to the game's aspect ratio instead of the whole viewport,
+       so the canvas never stretches. __WIDTH__ / __HEIGHT__ are the logical
+       size the game's Layout returns. */
+    html {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #111;
+      overflow: hidden;
+    }
+    body {
+      margin: 0;
+      width: min(__WIDTH__px, 100vw, calc(100vh * __WIDTH__ / __HEIGHT__));
+      aspect-ratio: __WIDTH__ / __HEIGHT__;
+      /* Ebitengine sets height:100% inline on the body; !important wins. */
+      height: auto !important;
+    }
+    canvas { display: block; }
+    /* Fixed, so it stays out of the flow and never counts toward the game
+       area that Ebitengine measures. */
+    .back {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      font: 14px system-ui, sans-serif;
+      color: #888;
+      text-decoration: none;
+    }
+    .back:hover { color: #fff; }
+  </style>
+</head>
+<body>
+  <a class="back" href="../">← Games</a>
+  <script src="../wasm_exec.js"></script>
+  <script>
+    const go = new Go();
+    WebAssembly.instantiateStreaming(fetch("game.wasm"), go.importObject).then(result => {
+      go.run(result.instance);
+    });
+  </script>
+</body>
+</html>
