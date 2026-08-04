@@ -38,14 +38,14 @@ Web (WASM) ビルドとファームウェアビルドには不要です。
 ゲーム本体はエンジン非依存で、Ebitengine と [sago35/koebiten](https://github.com/sago35/koebiten) の 2 つのフロントエンドがあります。
 
 ```
-internal/dinosaur/game/   エンジン非依存のゲームロジックと描画（どのエンジンにも依存しない）
+dinosaur/game/            エンジン非依存のゲームロジックと描画（どのエンジンにも依存しない）
   game.go                 状態遷移・物理・障害物・当たり判定・スコア
   player.go               プレイヤーの物理とスプライト
   enemy.go                障害物の種類・出現・スプライト
   draw.go                 Display インターフェースへの描画
   sound.go                効果音イベント（音そのものは鳴らさない）
   font.go                 3x5 ピクセルフォント
-internal/dinosaur/beep/   効果音の PCM 生成（標準ライブラリのみ、ディスプレイ無しでテストできる）
+dinosaur/beep/            効果音の PCM 生成（標準ライブラリのみ、ディスプレイ無しでテストできる）
 cmd/dinosaur-game/        Ebitengine フロントエンド（デスクトップと WASM）
   main.go                 入力と RGBA フレームバッファ
   sound.go                効果音イベントを Ebitengine のプレイヤーへ
@@ -53,7 +53,7 @@ cmd/dinosaur-firmware/    koebiten フロントエンド（マイコン実機向
 targets/                  TinyGo のカスタムターゲット定義（ボードごとに 1 ファイル）
 ```
 
-フロントエンドはどちらも `cmd/` 配下の独立した main パッケージで、共有するのは `internal/dinosaur/game` パッケージだけです。ボードの選択は koebiten 側がビルドタグで行うため、対応ボードを増やすときに増えるのは `targets/` の JSON であって `cmd/` ではありません。
+フロントエンドはどちらも `cmd/` 配下の独立した main パッケージで、共有するのは `dinosaur/game` パッケージだけです。ボードの選択は koebiten 側がビルドタグで行うため、対応ボードを増やすときに増えるのは `targets/` の JSON であって `cmd/` ではありません。
 
 `game` パッケージの前提は次のとおりです。
 
