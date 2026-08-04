@@ -39,7 +39,7 @@ func TestJengaUpdateRollingToJudgement(t *testing.T) {
 	j.dice.final = 1
 	j.dice.face = 1
 
-	j.Update()
+	j.Update(input{})
 
 	if j.phase != jengaJudgement {
 		t.Errorf("phase = %v, want jengaJudgement", j.phase)

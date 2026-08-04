@@ -6,7 +6,6 @@ import (
 
 	"github.com/hajimehoshi/bitmapfont/v3"
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 )
 
@@ -50,54 +49,59 @@ func New() *Game {
 }
 
 func (g *Game) Update() error {
-	switch g.scene {
-	case sceneTitle:
-		if inpututil.IsKeyJustPressed(ebiten.Key1) {
-			g.scene = sceneEffect
-		}
-		if inpututil.IsKeyJustPressed(ebiten.Key2) {
-			g.scene = sceneDuel
-		}
-		if inpututil.IsKeyJustPressed(ebiten.Key3) {
-			g.scene = sceneJenga
-		}
-	case sceneEffect:
-		if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
-			g.dice.Reset()
-			g.scene = sceneTitle
-			return nil
-		}
-		g.updateEffect()
-	case sceneDuel:
-		if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
-			g.duel.Reset()
-			g.scene = sceneTitle
-			return nil
-		}
-		g.duel.Update()
-	case sceneJenga:
-		if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
-			g.jenga.Reset()
-			g.scene = sceneTitle
-			return nil
-		}
-		g.jenga.Update()
-	}
+	g.handle(readInput(g.scene))
 	return nil
 }
 
-func (g *Game) updateEffect() {
+// handle は 1 フレーム分の入力を今のシーンに適用する。入力の読み取り
+// (readInput) と分けてあるので、Ebitengine を起動せずにテストできる。
+func (g *Game) handle(in input) {
+	switch g.scene {
+	case sceneTitle:
+		switch in.mode {
+		case 1:
+			g.scene = sceneEffect
+		case 2:
+			g.scene = sceneDuel
+		case 3:
+			g.scene = sceneJenga
+		}
+	case sceneEffect:
+		if in.back {
+			g.dice.Reset()
+			g.scene = sceneTitle
+			return
+		}
+		g.updateEffect(in)
+	case sceneDuel:
+		if in.back {
+			g.duel.Reset()
+			g.scene = sceneTitle
+			return
+		}
+		g.duel.Update(in)
+	case sceneJenga:
+		if in.back {
+			g.jenga.Reset()
+			g.scene = sceneTitle
+			return
+		}
+		g.jenga.Update(in)
+	}
+}
+
+func (g *Game) updateEffect(in input) {
 	switch g.dice.State() {
 	case stateIdle:
-		if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
+		if in.confirm {
 			g.dice.Roll()
 		}
 	case stateResult:
-		if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
+		if in.confirm {
 			g.dice.Roll()
 			return
 		}
-		if inpututil.IsKeyJustPressed(ebiten.KeyR) {
+		if in.reset {
 			g.dice.Reset()
 			return
 		}
@@ -124,10 +128,17 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 func (g *Game) drawTitleScene(screen *ebiten.Image) {
 	drawText(screen, g.face, "ジャッジメントダイス", screenWidth/2, 80, titleColor)
-	drawText(screen, g.face, "1: 遊戯王ジャッジメントダイス", screenWidth/2, 200, textColor)
-	drawText(screen, g.face, "2: タンクトップ小隊のジャッジメントダイス", screenWidth/2, 240, textColor)
-	drawText(screen, g.face, "3: タンクトップ小隊ジェンガモード", screenWidth/2, 280, textColor)
-	drawText(screen, g.face, "1 / 2 / 3 を押してね", screenWidth/2, screenHeight-60, hintColor)
+	// 選択肢の y は titleItemY（タップの当たり判定）と同じ順・同じ位置。
+	drawText(screen, g.face, "1: 遊戯王ジャッジメントダイス", screenWidth/2, titleItemY[0], textColor)
+	drawText(screen, g.face, "2: タンクトップ小隊のジャッジメントダイス", screenWidth/2, titleItemY[1], textColor)
+	drawText(screen, g.face, "3: タンクトップ小隊ジェンガモード", screenWidth/2, titleItemY[2], textColor)
+	drawText(screen, g.face, "1 / 2 / 3 キー、または選択肢をタップ", screenWidth/2, screenHeight-60, hintColor)
+}
+
+// drawBackButton は backRect の位置に「← タイトル」を描く。タップで戻れる
+// ことが見えていないと、キーの無い端末ではモードから出られない。
+func (g *Game) drawBackButton(screen *ebiten.Image) {
+	drawText(screen, g.face, "← タイトル", backRect.x+backRect.w/2, backRect.y+backRect.h/2, hintColor)
 }
 
 func (g *Game) drawEffectScene(screen *ebiten.Image) {
@@ -141,20 +152,23 @@ func (g *Game) drawEffectScene(screen *ebiten.Image) {
 	case stateRolling:
 		drawText(screen, g.face, "ダイスを振っています……", screenWidth/2, 310, textColor)
 	default:
-		drawText(screen, g.face, "SPACE でダイスを振る", screenWidth/2, 310, textColor)
+		drawText(screen, g.face, "SPACE またはタップでダイスを振る", screenWidth/2, 310, textColor)
 	}
 
-	drawText(screen, g.face, "SPACE: Roll    R: Reset    ESC: Title", screenWidth/2, screenHeight-24, hintColor)
+	drawText(screen, g.face, "SPACE / タップ: Roll    R: Reset    ESC: Title", screenWidth/2, screenHeight-24, hintColor)
+	g.drawBackButton(screen)
 }
 
 func (g *Game) drawDuelScene(screen *ebiten.Image) {
 	g.duel.Draw(screen, g.face)
-	drawText(screen, g.face, "SPACE: Next    ESC: Title", screenWidth/2, screenHeight-24, hintColor)
+	drawText(screen, g.face, "SPACE / タップ: Next    ESC: Title", screenWidth/2, screenHeight-24, hintColor)
+	g.drawBackButton(screen)
 }
 
 func (g *Game) drawJengaScene(screen *ebiten.Image) {
 	g.jenga.Draw(screen, g.face)
-	drawText(screen, g.face, "SPACE: Roll    ESC: Title", screenWidth/2, screenHeight-24, hintColor)
+	drawText(screen, g.face, "SPACE / タップ: Roll    ESC: Title", screenWidth/2, screenHeight-24, hintColor)
+	g.drawBackButton(screen)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {

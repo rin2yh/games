@@ -81,7 +81,7 @@ func TestDuelUpdateRollingToJudgement(t *testing.T) {
 	d.player.final = 2
 	d.player.face = 2
 
-	d.Update()
+	d.Update(input{})
 
 	if d.phase != duelJudgement {
 		t.Errorf("phase = %v, want duelJudgement", d.phase)
@@ -97,7 +97,7 @@ func TestDuelUpdateRollingStaysWhenNotBothDone(t *testing.T) {
 	d.player.state = stateRolling
 	d.player.tickCount = 10
 
-	d.Update()
+	d.Update(input{})
 
 	if d.phase != duelRolling {
 		t.Errorf("phase = %v, want duelRolling", d.phase)

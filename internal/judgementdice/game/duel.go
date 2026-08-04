@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 )
 
@@ -36,14 +35,14 @@ func (d *Duel) Reset() {
 	d.player.Reset()
 }
 
-func (d *Duel) Update() {
+func (d *Duel) Update(in input) {
 	if d.phase != duelIdle {
 		d.cpu.Update()
 		d.player.Update()
 	}
 	switch d.phase {
 	case duelIdle:
-		if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
+		if in.confirm {
 			d.cpu.Roll()
 			d.player.Roll()
 			d.phase = duelRolling
@@ -53,7 +52,7 @@ func (d *Duel) Update() {
 			d.phase = duelJudgement
 		}
 	case duelJudgement:
-		if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
+		if in.confirm {
 			d.Reset()
 		}
 	}
@@ -74,13 +73,13 @@ func (d *Duel) Draw(screen *ebiten.Image, face text.Face) {
 	case duelIdle:
 		drawText(screen, face, "偽遊戯：ルールは単純！　二人同時にサイコロを振る", screenWidth/2, 330, textColor)
 		drawText(screen, face, "オレより小さい目を出せばあんたの勝ち！　同じか大きいなら負けだ", screenWidth/2, 360, textColor)
-		drawText(screen, face, "SPACE でスタート", screenWidth/2, 390, textColor)
+		drawText(screen, face, "SPACE またはタップでスタート", screenWidth/2, 390, textColor)
 	case duelRolling:
 		drawText(screen, face, "サイコロが回っている……", screenWidth/2, 330, textColor)
 	case duelJudgement:
 		drawText(screen, face, fmt.Sprintf("CPU：%d  /  YOU：%d", d.cpu.Final(), d.player.Final()), screenWidth/2, 330, titleColor)
 		drawText(screen, face, d.Result(), screenWidth/2, 370, titleColor)
-		drawText(screen, face, "SPACE でもう一勝負", screenWidth/2, 400, textColor)
+		drawText(screen, face, "SPACE またはタップでもう一勝負", screenWidth/2, 400, textColor)
 	}
 }
 

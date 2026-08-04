@@ -2,7 +2,6 @@ package game
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 )
 
@@ -31,13 +30,13 @@ func (j *Jenga) Reset() {
 	j.dice.Reset()
 }
 
-func (j *Jenga) Update() {
+func (j *Jenga) Update(in input) {
 	if j.phase != jengaIdle {
 		j.dice.Update()
 	}
 	switch j.phase {
 	case jengaIdle:
-		if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
+		if in.confirm {
 			j.dice.Roll()
 			j.phase = jengaRolling
 		}
@@ -46,7 +45,7 @@ func (j *Jenga) Update() {
 			j.phase = jengaJudgement
 		}
 	case jengaJudgement:
-		if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
+		if in.confirm {
 			j.Reset()
 		}
 	}
@@ -61,7 +60,7 @@ func (j *Jenga) Draw(screen *ebiten.Image, face text.Face) {
 		drawText(screen, face, "ジャッジメントダイス降臨．", screenWidth/2, 300, textColor)
 		drawText(screen, face, "一が出れば俺のターン．", screenWidth/2, 330, textColor)
 		drawText(screen, face, "二から六が出れば．お前のターンとなるぜ．", screenWidth/2, 360, textColor)
-		drawText(screen, face, "SPACE でジャッジメントダイスを振れ", screenWidth/2, 400, hintColor)
+		drawText(screen, face, "SPACE またはタップでジャッジメントダイスを振れ", screenWidth/2, 400, hintColor)
 	case jengaRolling:
 		drawText(screen, face, "ジャッジメントダイス！ダイスを振り．．．", screenWidth/2, 330, textColor)
 	case jengaJudgement:
@@ -70,6 +69,6 @@ func (j *Jenga) Draw(screen *ebiten.Image, face text.Face) {
 		} else {
 			drawText(screen, face, "よし！！お前のターン！", screenWidth/2, 330, titleColor)
 		}
-		drawText(screen, face, "SPACE でもう一度", screenWidth/2, 400, hintColor)
+		drawText(screen, face, "SPACE またはタップでもう一度", screenWidth/2, 400, hintColor)
 	}
 }
