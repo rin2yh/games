@@ -1,0 +1,56 @@
+[tools]
+go = "1.25.6"
+tinygo = "0.41.1"
+
+[env]
+# Every game lands in web/<name>/game.wasm and shares one web/wasm_exec.js,
+# which is exactly the tree the Pages workflow publishes.
+GAMES = "dinosaur-game gopher-run judgement-dice"
+
+[tasks.build]
+description = "全ゲームのデスクトップ向けバイナリを bin/ にビルド"
+run = """
+for g in $GAMES; do
+  go build -o "bin/$g" "./cmd/$g"
+done
+"""
+
+[tasks.build-web]
+description = "web/<game>/game.wasm に全ゲームの WASM をビルド"
+run = """
+for g in $GAMES; do
+  GOOS=js GOARCH=wasm go build -o "web/$g/game.wasm" "./cmd/$g"
+done
+# install rather than cp: the copy in GOROOT is read-only, and cp would
+# carry that over and then fail to overwrite it on the next run.
+install -m 644 "$(go env GOROOT)/lib/wasm/wasm_exec.js" web/wasm_exec.js
+"""
+
+[tasks.serve]
+description = "build-web の成果物を http://localhost:8000 で配信（本番と同じ web/ をそのまま見る）"
+depends = ["build-web"]
+run = "python3 -m http.server 8000 --directory web"
+
+[tasks.serve-game]
+description = "1 ゲームだけ wasmserve で配信（リロードで再ビルド）: GAME=dinosaur-game mise run serve-game"
+run = 'go tool wasmserve -http=:8000 "./cmd/${GAME:?GAME に dinosaur-game / gopher-run / judgement-dice のいずれかを指定}"'
+
+[tasks.test]
+description = "テストを実行"
+run = "go test ./..."
+
+[tasks.lint]
+description = "go vet を実行"
+run = "go vet ./..."
+
+[tasks.fmt]
+description = "gofmt を適用"
+run = "gofmt -l -w ."
+
+[tasks.flash-firmware]
+description = "dinosaur-game のファームウェアを zero-kb02 に書き込み"
+run = "tinygo flash --target ./targets/zero-kb02.json --size short ./cmd/dinosaur-firmware"
+
+[tasks.clean]
+description = "ビルド成果物を削除"
+run = "rm -rf bin web/wasm_exec.js web/*/game.wasm"

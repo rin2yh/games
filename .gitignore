@@ -30,3 +30,19 @@ go.work.sum
 # Editor/IDE
 # .idea/
 # .vscode/
+
+# macOS
+.DS_Store
+
+# Editor/IDE
+.idea/
+.vscode/
+.claude/
+
+# Build artifacts (see mise.toml)
+bin/
+
+# WASM build output: generated into web/ by `mise run build-web`, published
+# straight from the Pages workflow, so it never needs to be committed.
+web/wasm_exec.js
+web/*/game.wasm

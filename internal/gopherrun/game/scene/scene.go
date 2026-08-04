@@ -1,0 +1,26 @@
+package scene
+
+import (
+	"github.com/hajimehoshi/ebiten/v2"
+	ebitentext "github.com/hajimehoshi/ebiten/v2/text/v2"
+)
+
+const (
+	ScreenWidth  = 800
+	ScreenHeight = 400
+	TileSize     = 32
+)
+
+type Scene interface {
+	Update() Scene
+	Draw(screen *ebiten.Image)
+}
+
+type Assets struct {
+	Gopher     *ebiten.Image
+	Dirt       *ebiten.Image
+	GrassTile  *ebiten.Image
+	Eagle      *ebiten.Image
+	Snake      *ebiten.Image
+	FontSource *ebitentext.GoTextFaceSource
+}

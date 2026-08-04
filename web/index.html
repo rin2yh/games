@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Games</title>
+<meta name="description" content="Go + Ebitengine で作ったブラウザゲーム集。">
+<meta property="og:title" content="Games">
+<meta property="og:description" content="Go + Ebitengine で作ったブラウザゲーム集。">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f7f7f7;
+    --fg: #1a1a1a;
+    --muted: #666;
+    --card: #fff;
+    --border: #e2e2e2;
+    --accent: #00add8; /* Go gopher blue */
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161a;
+      --fg: #e8e8e8;
+      --muted: #9a9a9a;
+      --card: #1c1f24;
+      --border: #2c3037;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 48px 20px 64px;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif;
+    line-height: 1.7;
+  }
+  main { max-width: 720px; margin: 0 auto; }
+  h1 {
+    margin: 0 0 8px;
+    font-size: clamp(28px, 6vw, 40px);
+    letter-spacing: -0.02em;
+  }
+  h1 .dot { color: var(--accent); }
+  .lead { margin: 0 0 40px; color: var(--muted); }
+  ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
+  a.card {
+    display: block;
+    padding: 20px 22px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color .15s, transform .15s;
+  }
+  a.card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+  .title { font-size: 18px; font-weight: 600; }
+  .title::after {
+    content: "→";
+    margin-left: 8px;
+    color: var(--accent);
+  }
+  .desc { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+  footer {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 14px;
+  }
+  footer a { color: inherit; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Games<span class="dot">.</span></h1>
+  <p class="lead">Go + <a href="https://ebitengine.org/" style="color:inherit">Ebitengine</a> で作ったゲームを WebAssembly で動かしています。</p>
+
+  <ul>
+    <li>
+      <a class="card" href="dinosaur-game/">
+        <div class="title">Dinosaur Game</div>
+        <p class="desc">どこかで見たような恐竜ゲーム。128×64 の 1bit 画面で、サボテンと鳥を避けて走り続ける。</p>
+      </a>
+    </li>
+    <li>
+      <a class="card" href="gopher-run/">
+        <div class="title">Gopher Run</div>
+        <p class="desc">Gopher が走る 2D エンドレスランナー。鷲とヘビをジャンプと潜りでかわす。</p>
+      </a>
+    </li>
+    <li>
+      <a class="card" href="judgement-dice/">
+        <div class="title">ジャッジメントダイス</div>
+        <p class="desc">サイコロゲーム。遊戯王モード・対戦モード・ジェンガモードの 3 種を収録。</p>
+      </a>
+    </li>
+  </ul>
+
+  <footer>
+    ソースは <a href="https://github.com/rin2yh/games">github.com/rin2yh/games</a>
+  </footer>
+</main>
+</body>
+</html>

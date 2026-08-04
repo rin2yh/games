@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+
+      # Ebitengine links against GL/X11/ALSA even in tests: importing the
+      # package initializes GLFW at init time, so these are needed to build
+      # and to get as far as main.
+      - name: Install Ebitengine's system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libgl1-mesa-dev libgles2-mesa-dev libglu1-mesa-dev libxxf86vm-dev \
+            xorg-dev libasound2-dev xvfb mesa-utils
+
+      - run: go vet ./...
+
+      # GLFW needs a display to initialize; xvfb-run supplies a headless one
+      # and Mesa's software renderer serves the GL context.
+      - name: Test
+        run: xvfb-run -a go test ./...
+        env:
+          LIBGL_ALWAYS_SOFTWARE: "1"
+
+      - name: Check gofmt
+        run: |
+          unformatted=$(gofmt -l .)
+          if [ -n "$unformatted" ]; then
+            echo "gofmt required for:"
+            echo "$unformatted"
+            exit 1
+          fi
+
+  build-wasm:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+
+      # The Pages artifact is WASM only, so a pull request is worth failing
+      # on a broken WASM build even though the deploy job never runs here.
+      - name: Build every game into web/
+        run: |
+          for g in dinosaur-game gopher-run judgement-dice; do
+            GOOS=js GOARCH=wasm go build -o "web/$g/game.wasm" "./cmd/$g"
+          done
