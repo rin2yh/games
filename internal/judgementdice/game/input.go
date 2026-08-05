@@ -20,15 +20,19 @@ type input struct {
 
 // titleItems はタイトルの選択肢。表示・キー・タップの当たり判定がこの 1 つの
 // 表から出るので、行を足しても消しても食い違いようがない。
+//
+// keys に上段の数字とテンキーの両方を並べるのは、「1」を押したつもりの入力が
+// キーの位置で別物になるから。Ebitengine にとって上段は Key1、テンキーは
+// KeyNumpad1 で、Key1 しか見ていないとテンキーの数字は無視される。
 var titleItems = [...]struct {
 	label string
 	y     float64
-	key   ebiten.Key
+	keys  []ebiten.Key
 	mode  scene
 }{
-	{"1: 遊戯王ジャッジメントダイス", 200, ebiten.Key1, sceneEffect},
-	{"2: タンクトップ小隊のジャッジメントダイス", 240, ebiten.Key2, sceneDuel},
-	{"3: タンクトップ小隊ジェンガモード", 280, ebiten.Key3, sceneJenga},
+	{"1: 遊戯王ジャッジメントダイス", 200, []ebiten.Key{ebiten.Key1, ebiten.KeyNumpad1}, sceneEffect},
+	{"2: タンクトップ小隊のジャッジメントダイス", 240, []ebiten.Key{ebiten.Key2, ebiten.KeyNumpad2}, sceneDuel},
+	{"3: タンクトップ小隊ジェンガモード", 280, []ebiten.Key{ebiten.Key3, ebiten.KeyNumpad3}, sceneJenga},
 }
 
 const titleItemHeight = 36
@@ -59,7 +63,7 @@ func readInput() input {
 		reset:   inpututil.IsKeyJustPressed(ebiten.KeyR),
 	}
 	for _, it := range titleItems {
-		if inpututil.IsKeyJustPressed(it.key) {
+		if anyJustPressed(it.keys) {
 			in.mode = it.mode
 			break
 		}
@@ -78,6 +82,15 @@ func readInput() input {
 		in.confirm = true
 	}
 	return in
+}
+
+func anyJustPressed(keys []ebiten.Key) bool {
+	for _, k := range keys {
+		if inpututil.IsKeyJustPressed(k) {
+			return true
+		}
+	}
+	return false
 }
 
 // justTapped はこのフレームで新しく押されたマウス左ボタン / タッチの位置を、

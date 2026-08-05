@@ -3,7 +3,30 @@ package game
 import (
 	"image"
 	"testing"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
+
+// 「1」には上段とテンキーの 2 つがあり、Ebitengine では別のキーになる。
+// 片方しか並べていない行があると、そのモードはテンキーから選べない。
+func TestTitleItemsAcceptBothNumberRows(t *testing.T) {
+	numpad := map[ebiten.Key]bool{
+		ebiten.KeyNumpad1: true, ebiten.KeyNumpad2: true, ebiten.KeyNumpad3: true,
+	}
+	digit := map[ebiten.Key]bool{
+		ebiten.Key1: true, ebiten.Key2: true, ebiten.Key3: true,
+	}
+	for _, it := range titleItems {
+		var hasNumpad, hasDigit bool
+		for _, k := range it.keys {
+			hasNumpad = hasNumpad || numpad[k]
+			hasDigit = hasDigit || digit[k]
+		}
+		if !hasDigit || !hasNumpad {
+			t.Errorf("%q: keys = %v（上段=%v テンキー=%v）、両方要る", it.label, it.keys, hasDigit, hasNumpad)
+		}
+	}
+}
 
 func TestModeAt(t *testing.T) {
 	cases := []struct {
