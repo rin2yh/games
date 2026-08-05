@@ -90,4 +90,5 @@ mise run serve   # http://localhost:8000
 | 真っ白なまま | index.html が `../boot.js` を読み込んでいない |
 | `Go is not defined` | `../wasm_exec.js` を読み込んでいない。パスが `wasm_exec.js` になっていないか |
 | ゲームの外（余白）をクリックするとキーが効かなくなる | `../boot.js` を読み込んでいない。フォーカスが body に移ったまま戻っていない |
+| 特定の環境でだけ数字キーが効かない | `ebiten.Key1` は `e.code`（キーの物理位置）が期待通りに来たときしか当たらない。`e.code` は空だったり別物だったりする。文字を待つ操作は `ebiten.AppendInputChars` で受ける（`internal/judgementdice/game/input.go` が例）|
 | クリック / タップの位置がずれる | Ebitengine の js バックエンドはポインタ位置に `clientX` / `clientY` をそのまま使うので、index.html のように canvas を画面中央へ寄せていると canvas の位置だけずれる。`internal/webpointer` の `Offset` を引く（`internal/judgementdice/game/input.go` が例）|

@@ -7,6 +7,39 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+// 打たれた文字での判定。e.code が当てにならない環境ではこちらしか届かないので、
+// ここが選択の主役になる。
+func TestTyped(t *testing.T) {
+	cases := []struct {
+		name  string
+		chars []rune
+		want  rune
+		ok    bool
+	}{
+		{"半角の 1", []rune{'1'}, '1', true},
+		{"全角の１", []rune{'１'}, '1', true},
+		{"別の数字", []rune{'2'}, '1', false},
+		{"何も打たれていない", nil, '1', false},
+		{"複数打たれたうちの 1 つ", []rune{'a', '3', 'b'}, '3', true},
+		{"半角スペース", []rune{' '}, ' ', true},
+	}
+	for _, c := range cases {
+		if got := typed(c.chars, c.want); got != c.ok {
+			t.Errorf("%s: typed(%q, %q) = %v, want %v", c.name, c.chars, c.want, got, c.ok)
+		}
+	}
+}
+
+// 選択肢の文字は、画面に出しているラベルの先頭と一致していないといけない。
+// 「1 を押してね」と書いておいて '2' を待つ、のような食い違いを止める。
+func TestTitleItemCharMatchesLabel(t *testing.T) {
+	for _, it := range titleItems {
+		if head := []rune(it.label)[0]; head != it.ch {
+			t.Errorf("%q: ラベルの先頭は %q なのに ch = %q", it.label, head, it.ch)
+		}
+	}
+}
+
 // 「1」には上段とテンキーの 2 つがあり、Ebitengine では別のキーになる。
 // 片方しか並べていない行があると、そのモードはテンキーから選べない。
 func TestTitleItemsAcceptBothNumberRows(t *testing.T) {
