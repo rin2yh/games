@@ -2,30 +2,50 @@ package game
 
 import (
 	"image"
+	"strings"
 	"testing"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
 // 打たれた文字での判定。e.code が当てにならない環境ではこちらしか届かないので、
-// ここが選択の主役になる。
-func TestTyped(t *testing.T) {
+// ここが選択の主役になる。照合する側が素の文字だけ書けるよう、全角と大小は
+// normalize が吸収する。
+func TestNormalize(t *testing.T) {
 	cases := []struct {
 		name  string
 		chars []rune
-		want  rune
-		ok    bool
+		want  []rune
 	}{
-		{"半角の 1", []rune{'1'}, '1', true},
-		{"全角の１", []rune{'１'}, '1', true},
-		{"別の数字", []rune{'2'}, '1', false},
-		{"何も打たれていない", nil, '1', false},
-		{"複数打たれたうちの 1 つ", []rune{'a', '3', 'b'}, '3', true},
-		{"半角スペース", []rune{' '}, ' ', true},
+		{"半角はそのまま", []rune{'1'}, []rune{'1'}},
+		{"全角の数字は半角へ", []rune{'１', '２', '３'}, []rune{'1', '2', '3'}},
+		{"大文字は小文字へ", []rune{'R'}, []rune{'r'}},
+		{"全角の大文字も", []rune{'Ｒ'}, []rune{'r'}},
+		{"スペースはそのまま", []rune{' '}, []rune{' '}},
+		{"畳めない文字は触らない", []rune{'あ'}, []rune{'あ'}},
+		{"空", nil, nil},
 	}
 	for _, c := range cases {
-		if got := typed(c.chars, c.want); got != c.ok {
-			t.Errorf("%s: typed(%q, %q) = %v, want %v", c.name, c.chars, c.want, got, c.ok)
+		if got := normalize(c.chars); string(got) != string(c.want) {
+			t.Errorf("%s: normalize(%q) = %q, want %q", c.name, c.chars, got, c.want)
+		}
+	}
+}
+
+// digitKeys は Ebitengine のキー定数が 0〜9 の連番であることに乗っている。
+// 並びが変わったらここで落ちる。
+func TestDigitKeys(t *testing.T) {
+	cases := []struct {
+		ch   rune
+		want [2]ebiten.Key
+	}{
+		{'1', [2]ebiten.Key{ebiten.Key1, ebiten.KeyNumpad1}},
+		{'2', [2]ebiten.Key{ebiten.Key2, ebiten.KeyNumpad2}},
+		{'3', [2]ebiten.Key{ebiten.Key3, ebiten.KeyNumpad3}},
+	}
+	for _, c := range cases {
+		if got := digitKeys(c.ch); got != c.want {
+			t.Errorf("digitKeys(%q) = %v, want %v", c.ch, got, c.want)
 		}
 	}
 }
@@ -40,23 +60,12 @@ func TestTitleItemCharMatchesLabel(t *testing.T) {
 	}
 }
 
-// 「1」には上段とテンキーの 2 つがあり、Ebitengine では別のキーになる。
-// 片方しか並べていない行があると、そのモードはテンキーから選べない。
-func TestTitleItemsAcceptBothNumberRows(t *testing.T) {
-	numpad := map[ebiten.Key]bool{
-		ebiten.KeyNumpad1: true, ebiten.KeyNumpad2: true, ebiten.KeyNumpad3: true,
-	}
-	digit := map[ebiten.Key]bool{
-		ebiten.Key1: true, ebiten.Key2: true, ebiten.Key3: true,
-	}
+// 画面下の案内は titleItems から起こす。行を足したのに案内が古いまま、が
+// 起きないこと。
+func TestTitleHintListsEveryItem(t *testing.T) {
 	for _, it := range titleItems {
-		var hasNumpad, hasDigit bool
-		for _, k := range it.keys {
-			hasNumpad = hasNumpad || numpad[k]
-			hasDigit = hasDigit || digit[k]
-		}
-		if !hasDigit || !hasNumpad {
-			t.Errorf("%q: keys = %v（上段=%v テンキー=%v）、両方要る", it.label, it.keys, hasDigit, hasNumpad)
+		if !strings.ContainsRune(titleHint, it.ch) {
+			t.Errorf("titleHint = %q に %q が出てこない", titleHint, it.ch)
 		}
 	}
 }

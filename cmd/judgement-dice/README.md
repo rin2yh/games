@@ -32,14 +32,15 @@ internal/judgementdice/game/ ゲームロジック（Dice / Duel / Jenga / Effec
 タイトルの選択肢は表示・入力・当たり判定を 1 つの表 (`titleItems`) から出して
 いるので、モードを足すならそこだけを触る。
 
-数字と `SPACE` は**打たれた文字**（`AppendInputChars`）で判定している。
-Ebitengine の js バックエンドはキーを 2 系統で記録していて、`ebiten.Key1` に
-当たるのは `e.code` が期待通りに来たときだけ。`e.code` は環境によって空だっ
-たり別物だったりし、そのときでも `e.key` は "1" のまま届く。画面が「1 を押し
-てね」と文字で頼んでいる以上、文字で受けるのが素直で確実でもある。
+数字と `SPACE` はキーではなく**打たれた文字**で判定している。理由は
+`input.go` の `titleItems` のコメントにある。
 
 ## 実行
 
 ```sh
 GAME=judgement-dice mise run serve-game
 ```
+
+`serve-game` は wasmserve が生成するページなので、`web/judgement-dice/index.html`
+も `web/boot.js` も通らない。キーやタップまわりを触ったときは、本番と同じ
+`web/` を配信する `mise run serve` で確かめる。

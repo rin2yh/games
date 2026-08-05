@@ -2,6 +2,9 @@ package game
 
 import (
 	"image"
+	"slices"
+	"strings"
+	"unicode"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
@@ -30,31 +33,50 @@ type input struct {
 // 挟んだ場合など）。そのとき e.key は "1" のまま届くので、文字で見ていれば
 // 選べる。テンキーの「1」も、位置は KeyNumpad1 だが文字は "1" で来る。
 //
-// keys は逆に文字が来ない環境のための保険で、両方見ておけばどちらか一方が
+// キー判定は逆に文字が来ない環境のための保険で、両方見ておけばどちらか一方が
 // 欠けても通る。
 var titleItems = [...]struct {
 	label string
 	y     float64
 	ch    rune
-	keys  []ebiten.Key
 	mode  scene
 }{
-	{"1: 遊戯王ジャッジメントダイス", 200, '1', []ebiten.Key{ebiten.Key1, ebiten.KeyNumpad1}, sceneEffect},
-	{"2: タンクトップ小隊のジャッジメントダイス", 240, '2', []ebiten.Key{ebiten.Key2, ebiten.KeyNumpad2}, sceneDuel},
-	{"3: タンクトップ小隊ジェンガモード", 280, '3', []ebiten.Key{ebiten.Key3, ebiten.KeyNumpad3}, sceneJenga},
+	{"1: 遊戯王ジャッジメントダイス", 200, '1', sceneEffect},
+	{"2: タンクトップ小隊のジャッジメントダイス", 240, '2', sceneDuel},
+	{"3: タンクトップ小隊ジェンガモード", 280, '3', sceneJenga},
 }
 
-// 全角の数字は ASCII の数字から 0xFEE0 離れている。日本語入力が全角のままでも
-// 「１」で選べるように、どちらも同じ文字として扱う。
+// titleHint はタイトル下部の案内。押す文字を titleItems から起こすので、行を
+// 足したときに案内だけ古いままにならない。
+var titleHint = func() string {
+	chars := make([]string, 0, len(titleItems))
+	for _, it := range titleItems {
+		chars = append(chars, string(it.ch))
+	}
+	return strings.Join(chars, " / ") + " キー、または選択肢をタップ"
+}()
+
+// digitKeys は ch の数字が置かれている 2 か所（上段とテンキー）のキーを返す。
+// Ebitengine では別のキーで、定数は 0〜9 が連番に並んでいる。
+func digitKeys(ch rune) [2]ebiten.Key {
+	d := ebiten.Key(ch - '0')
+	return [2]ebiten.Key{ebiten.Key0 + d, ebiten.KeyNumpad0 + d}
+}
+
+// 全角の英数字は ASCII から 0xFEE0 離れたところに同じ並びで入っている。
 const toFullWidth = 0xFEE0
 
-func typed(chars []rune, want rune) bool {
-	for _, r := range chars {
-		if r == want || r == want+toFullWidth {
-			return true
+// normalize は打たれた文字を照合できる形に均す。全角を半角に戻し、大文字を
+// 小文字に寄せるので、照合する側は素の文字だけ書けばいい。畳み方をここ 1 か所に
+// 押し込めておかないと、キーを足すたびに全角と大小の両方を思い出す羽目になる。
+func normalize(chars []rune) []rune {
+	for i, r := range chars {
+		if '！' <= r && r <= '～' {
+			r -= toFullWidth
 		}
+		chars[i] = unicode.ToLower(r)
 	}
-	return false
+	return chars
 }
 
 const titleItemHeight = 36
@@ -83,14 +105,15 @@ func readInput() input {
 	// 文字が来ない（e.key が "Escape" で、文字ではなくキー名なので）ため
 	// e.code 頼みになる。戻る手段が画面内に「← タイトル」としても出ているのは
 	// そのため。
-	chars := ebiten.AppendInputChars(nil)
+	chars := normalize(ebiten.AppendInputChars(nil))
 	in := input{
-		confirm: typed(chars, ' ') || inpututil.IsKeyJustPressed(ebiten.KeySpace),
+		confirm: slices.Contains(chars, ' ') || inpututil.IsKeyJustPressed(ebiten.KeySpace),
 		back:    inpututil.IsKeyJustPressed(ebiten.KeyEscape),
-		reset:   typed(chars, 'r') || typed(chars, 'R') || inpututil.IsKeyJustPressed(ebiten.KeyR),
+		reset:   slices.Contains(chars, 'r') || inpututil.IsKeyJustPressed(ebiten.KeyR),
 	}
 	for _, it := range titleItems {
-		if typed(chars, it.ch) || anyJustPressed(it.keys) {
+		keys := digitKeys(it.ch)
+		if slices.Contains(chars, it.ch) || slices.ContainsFunc(keys[:], inpututil.IsKeyJustPressed) {
 			in.mode = it.mode
 			break
 		}
@@ -109,15 +132,6 @@ func readInput() input {
 		in.confirm = true
 	}
 	return in
-}
-
-func anyJustPressed(keys []ebiten.Key) bool {
-	for _, k := range keys {
-		if inpututil.IsKeyJustPressed(k) {
-			return true
-		}
-	}
-	return false
 }
 
 // justTapped はこのフレームで新しく押されたマウス左ボタン / タッチの位置を、
