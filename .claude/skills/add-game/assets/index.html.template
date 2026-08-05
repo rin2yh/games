@@ -57,7 +57,7 @@
 <body>
   <a class="back" href="../">← Games</a>
   <script src="../wasm_exec.js"></script>
-  <!-- game.wasm の読み込みと、canvas へのフォーカス当て。全ゲーム共通。 -->
+  <!-- game.wasm の読み込みと、canvas へのフォーカスの戻し。全ゲーム共通。 -->
   <script src="../boot.js"></script>
 </body>
 </html>

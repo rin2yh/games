@@ -17,7 +17,7 @@ description: games リポジトリ (Go + Ebitengine を WebAssembly で GitHub P
 
 **WASM の出力名は `game.wasm` 固定、`wasm_exec.js` は `web/` に 1 つだけ。** どのゲームの index.html も `../wasm_exec.js` を参照する。ゲームごとに置くと同じファイルが複製されるだけなので置かない。
 
-**起動処理は `web/boot.js` に 1 つだけ。** `game.wasm` の読み込みと、生成された canvas へのフォーカス当てが入っている。Ebitengine の js バックエンドはキーイベントを canvas に登録するので、**canvas にフォーカスが無い間はキーが一切効かない**（issue #1）。時間が経てば直るものではなく、canvas をクリックしてフォーカスが移るまでずっと効かない。index.html 側に起動コードを書き直すとこのフォーカス処理が抜けるので、`../boot.js` を読むだけにする。
+**起動処理は `web/boot.js` に 1 つだけ。** `game.wasm` の読み込みと、canvas へのフォーカスの戻しが入っている。Ebitengine の js バックエンドはキーイベントを canvas にだけ登録するので、**canvas にフォーカスが無い間はキーが一切効かない**（issue #1）。起動時のフォーカスは Ebitengine 自身が当てるが、index.html はゲームを画面中央に置くので、まわりの余白をクリックするとフォーカスが body へ移り、そこから先はキーが死んだままになる。`boot.js` はそれを拾い直している。index.html 側に起動コードを書き直すとこの処理が抜けるので、`../boot.js` を読むだけにする。
 
 ## 手順
 
@@ -89,5 +89,5 @@ mise run serve   # http://localhost:8000
 | 404 になる | `web/<name>/index.html` が無い、または `cmd/<name>` と名前が違う |
 | 真っ白なまま | index.html が `../boot.js` を読み込んでいない |
 | `Go is not defined` | `../wasm_exec.js` を読み込んでいない。パスが `wasm_exec.js` になっていないか |
-| canvas をクリックするまでキーが効かない | `../boot.js` を読み込んでいない。canvas にフォーカスが当たっていない |
+| ゲームの外（余白）をクリックするとキーが効かなくなる | `../boot.js` を読み込んでいない。フォーカスが body に移ったまま戻っていない |
 | クリック / タップの位置がずれる | Ebitengine の js バックエンドはポインタ位置に `clientX` / `clientY` をそのまま使うので、index.html のように canvas を画面中央へ寄せていると canvas の位置だけずれる。`internal/webpointer` の `Offset` を引く（`internal/judgementdice/game/input.go` が例）|

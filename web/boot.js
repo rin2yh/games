@@ -3,37 +3,23 @@
 // の順に読む。カレントディレクトリの game.wasm を読むので、置き場所は
 // web/<game>/index.html が想定。
 (() => {
-  // Ebitengine の js バックエンドは keydown / keyup を canvas に登録する
-  // (internal/ui/ui_js.go)。canvas は tabindex 付きで生成されるものの、
-  // 誰もフォーカスを当てないので、フォーカスが canvas に無い間はキー入力が
-  // どこにも届かない。canvas をクリックすれば Ebitengine 側の mousedown
-  // ハンドラが focus() を呼ぶが、それまでは何分待っても効かないままで、
-  // キー入力しか受け付けないゲームは操作する手段が無い。
-  const focusCanvas = () => {
-    const canvas = document.querySelector("canvas");
-    if (!canvas) {
-      return false;
-    }
-    canvas.focus();
-    return true;
-  };
-
-  // canvas は go.run() の中で body に追加されるので、出てくるのを待つ。
-  const observer = new MutationObserver(() => {
-    if (focusCanvas()) {
-      observer.disconnect();
-    }
-  });
-  observer.observe(document.body, { childList: true });
-
-  // canvas の外（本文の余白）をクリックするとフォーカスが外れ、以降キーが
-  // 効かなくなる。戻ってきたときに拾い直す。リンクは押した先に用があるので
-  // そのままにする。
-  document.addEventListener("pointerdown", (event) => {
+  // Ebitengine の js バックエンドは keydown / keyup を canvas にだけ登録する
+  // (internal/ui/ui_js.go)。起動時に canvas へフォーカスを当てるのも
+  // Ebitengine 自身がやる（同 initOnMainThread）ので、開いた直後は効く。
+  //
+  // 問題はそのあと。index.html はゲームを画面中央に置くので、まわりの余白は
+  // どのゲームでも広い。そこをクリックするとフォーカスは body に移り、canvas
+  // を狙ってクリックし直すまでキーが一切効かなくなる。押しても無反応なので、
+  // 原因がフォーカスだと気づける手がかりが画面に何も出ない。
+  //
+  // click で拾うのは、mousedown の既定の動作がフォーカスを移すのがこの後
+  // だから。pointerdown や mousedown で focus() を呼んでも上書きされる。
+  // リンクは押した先に用があるので、フォーカスを横取りしない。
+  document.addEventListener("click", (event) => {
     if (event.target instanceof Element && event.target.closest("a")) {
       return;
     }
-    focusCanvas();
+    document.querySelector("canvas")?.focus();
   });
 
   const go = new Go();
