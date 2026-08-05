@@ -5,9 +5,10 @@
 (() => {
   // Ebitengine の js バックエンドは keydown / keyup を canvas に登録する
   // (internal/ui/ui_js.go)。canvas は tabindex 付きで生成されるものの、
-  // 誰もフォーカスを当てないので、ページを開いた直後はキー入力がどこにも
-  // 届かない。canvas をクリックすれば Ebitengine 側の mousedown ハンドラが
-  // focus() を呼ぶが、キー入力しか受け付けないゲームはそれまで操作できない。
+  // 誰もフォーカスを当てないので、フォーカスが canvas に無い間はキー入力が
+  // どこにも届かない。canvas をクリックすれば Ebitengine 側の mousedown
+  // ハンドラが focus() を呼ぶが、それまでは何分待っても効かないままで、
+  // キー入力しか受け付けないゲームは操作する手段が無い。
   const focusCanvas = () => {
     const canvas = document.querySelector("canvas");
     if (!canvas) {
