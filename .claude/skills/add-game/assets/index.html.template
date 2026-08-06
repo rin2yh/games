@@ -19,7 +19,12 @@
     /* Ebitengine sizes its canvas from <body>, so the body *is* the game
        area. Pin it to the game's aspect ratio instead of the whole viewport,
        so the canvas never stretches. __WIDTH__ / __HEIGHT__ are the logical
-       size the game's Layout returns. */
+       size the game's Layout returns.
+
+       Centering here moves the canvas off the viewport origin, which is
+       where Ebitengine assumes it is when it reports pointer positions. A
+       game that reads tap positions has to subtract the difference; see
+       internal/webpointer. */
     html {
       height: 100%;
       display: flex;
@@ -52,11 +57,7 @@
 <body>
   <a class="back" href="../">← Games</a>
   <script src="../wasm_exec.js"></script>
-  <script>
-    const go = new Go();
-    WebAssembly.instantiateStreaming(fetch("game.wasm"), go.importObject).then(result => {
-      go.run(result.instance);
-    });
-  </script>
+  <!-- game.wasm の読み込みと、canvas へのフォーカスの戻し。全ゲーム共通。 -->
+  <script src="../boot.js"></script>
 </body>
 </html>

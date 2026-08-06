@@ -103,3 +103,27 @@ func TestDuelUpdateRollingStaysWhenNotBothDone(t *testing.T) {
 		t.Errorf("phase = %v, want duelRolling", d.phase)
 	}
 }
+
+func TestDuelConfirmStartsAndRestarts(t *testing.T) {
+	d := NewDuel()
+
+	d.Confirm()
+	if d.phase != duelRolling {
+		t.Fatalf("phase = %v, want duelRolling", d.phase)
+	}
+	if d.cpu.state != stateRolling || d.player.state != stateRolling {
+		t.Errorf("両方振り出していない: cpu=%v player=%v", d.cpu.state, d.player.state)
+	}
+
+	// 振っている最中の操作は効かない。
+	d.Confirm()
+	if d.phase != duelRolling {
+		t.Errorf("phase = %v, want duelRolling", d.phase)
+	}
+
+	d.phase = duelJudgement
+	d.Confirm()
+	if d.phase != duelIdle {
+		t.Errorf("判定後の Confirm で仕切り直しにならない: phase = %v", d.phase)
+	}
+}

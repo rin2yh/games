@@ -18,7 +18,12 @@
   <style>
     /* The game lays out at a fixed 640x480; let Ebitengine scale its canvas
        to fill the body and cap the body at that aspect ratio so the canvas
-       never stretches. */
+       never stretches. The 640px cap keeps the bitmap font at 1:1.
+
+       Centering moves the canvas off the viewport origin, which is where
+       Ebitengine assumes it is when it reports pointer positions. The game
+       reads tap positions, so it subtracts the difference; see
+       internal/webpointer. */
     html {
       height: 100%;
       display: flex;
@@ -49,11 +54,6 @@
 <body>
   <a class="back" href="../">← Games</a>
   <script src="../wasm_exec.js"></script>
-  <script>
-    const go = new Go();
-    WebAssembly.instantiateStreaming(fetch("game.wasm"), go.importObject).then(result => {
-      go.run(result.instance);
-    });
-  </script>
+  <script src="../boot.js"></script>
 </body>
 </html>
