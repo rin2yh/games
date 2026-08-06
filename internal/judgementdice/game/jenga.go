@@ -30,24 +30,28 @@ func (j *Jenga) Reset() {
 	j.dice.Reset()
 }
 
-func (j *Jenga) Update(confirm bool) {
-	if j.phase != jengaIdle {
-		j.dice.Update()
+// Update は毎フレームの進行。振っている最中のサイコロを進め、止まったら判定に
+// 移る。
+func (j *Jenga) Update() {
+	if j.phase == jengaIdle {
+		return
 	}
+	j.dice.Update()
+
+	if j.phase == jengaRolling && j.dice.State() == stateResult {
+		j.phase = jengaJudgement
+	}
+}
+
+// Confirm は SPACE / タップに当たる 1 回きりの操作。振っている最中は何も
+// 起きない。
+func (j *Jenga) Confirm() {
 	switch j.phase {
 	case jengaIdle:
-		if confirm {
-			j.dice.Roll()
-			j.phase = jengaRolling
-		}
-	case jengaRolling:
-		if j.dice.State() == stateResult {
-			j.phase = jengaJudgement
-		}
+		j.dice.Roll()
+		j.phase = jengaRolling
 	case jengaJudgement:
-		if confirm {
-			j.Reset()
-		}
+		j.Reset()
 	}
 }
 

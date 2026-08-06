@@ -72,9 +72,17 @@ func (g *Game) handle(in input) {
 	case sceneEffect:
 		g.updateEffect(in)
 	case sceneDuel:
-		g.duel.Update(in.confirm)
+		// 操作が来たときだけ Confirm。進行の Update より先に呼ぶのは、振り
+		// 終わったフレームの操作まで拾って結果を飛ばしてしまわないため。
+		if in.confirm {
+			g.duel.Confirm()
+		}
+		g.duel.Update()
 	case sceneJenga:
-		g.jenga.Update(in.confirm)
+		if in.confirm {
+			g.jenga.Confirm()
+		}
+		g.jenga.Update()
 	}
 }
 

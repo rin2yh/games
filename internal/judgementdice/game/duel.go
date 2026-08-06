@@ -35,26 +35,30 @@ func (d *Duel) Reset() {
 	d.player.Reset()
 }
 
-func (d *Duel) Update(confirm bool) {
-	if d.phase != duelIdle {
-		d.cpu.Update()
-		d.player.Update()
+// Update は毎フレームの進行。振っている最中のサイコロを進め、両方止まったら
+// 判定に移る。
+func (d *Duel) Update() {
+	if d.phase == duelIdle {
+		return
 	}
+	d.cpu.Update()
+	d.player.Update()
+
+	if d.phase == duelRolling && d.cpu.State() == stateResult && d.player.State() == stateResult {
+		d.phase = duelJudgement
+	}
+}
+
+// Confirm は SPACE / タップに当たる 1 回きりの操作。振っている最中は何も
+// 起きない。
+func (d *Duel) Confirm() {
 	switch d.phase {
 	case duelIdle:
-		if confirm {
-			d.cpu.Roll()
-			d.player.Roll()
-			d.phase = duelRolling
-		}
-	case duelRolling:
-		if d.cpu.State() == stateResult && d.player.State() == stateResult {
-			d.phase = duelJudgement
-		}
+		d.cpu.Roll()
+		d.player.Roll()
+		d.phase = duelRolling
 	case duelJudgement:
-		if confirm {
-			d.Reset()
-		}
+		d.Reset()
 	}
 }
 
