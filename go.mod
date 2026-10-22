@@ -1,6 +1,6 @@
 module github.com/rin2yh/games
 
-go 1.25.6
+go 1.27.3
 
 require (
 	github.com/hajimehoshi/bitmapfont/v3 v3.3.0
