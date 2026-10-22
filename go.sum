@@ -44,6 +44,7 @@ github.com/rivo/uniseg v0.4.7 h1:WUdvkW8uEhrYfLC4ZzdpI2ztxP1I582+49Oc5Mq64VQ=
 github.com/rivo/uniseg v0.4.7/go.mod h1:FN3SvrM+Zdj16jyLfmOkMNblXMcoc8DfTHruCPUcx88=
 github.com/sago35/koebiten v0.5.0 h1:LHkyKaK6s2T7OQblV3GN6ZHcg5wzoC9OvkByNutYKJk=
 github.com/sago35/koebiten v0.5.0/go.mod h1:p4D/TJE8vSrPp+Za1GUJnU3Gio4qzpu307MFxtjt/QM=
+github.com/sago35/koebiten v0.6.0/go.mod h1:p4D/TJE8vSrPp+Za1GUJnU3Gio4qzpu307MFxtjt/QM=
 github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef h1:Ch6Q+AZUxDBCVqdkI8FSpFyZDtCVBc2VmejdNrm5rRQ=
 github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef/go.mod h1:nXTWP6+gD5+LUJ8krVhhoeHjvHTutPxMYl5SvkcnJNE=
 golang.org/x/image v0.31.0 h1:mLChjE2MV6g1S7oqbXC0/UcKijjm5fnJLUYKIYrLESA=
