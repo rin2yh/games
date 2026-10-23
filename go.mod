@@ -4,6 +4,7 @@ go 1.27.3
 
 require (
 	github.com/hajimehoshi/bitmapfont/v3 v3.3.0
+	github.com/hajimehoshi/bitmapfont/v4 v4.2.0
 	github.com/hajimehoshi/ebiten/v2 v2.10.5
 	github.com/sago35/koebiten v0.6.0
 	golang.org/x/image v0.47.0
