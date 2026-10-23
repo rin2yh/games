@@ -7,7 +7,7 @@ require (
 	github.com/hajimehoshi/ebiten/v2 v2.10.5
 	github.com/sago35/koebiten v0.6.0
 	golang.org/x/image v0.47.0
-	tinygo.org/x/drivers v0.33.0
+	tinygo.org/x/drivers v0.36.0
 )
 
 require (
