@@ -5,7 +5,7 @@ go 1.27.3
 require (
 	github.com/hajimehoshi/bitmapfont/v3 v3.3.0
 	github.com/hajimehoshi/bitmapfont/v4 v4.2.0
-	github.com/hajimehoshi/ebiten/v2 v2.10.5
+	github.com/hajimehoshi/ebiten/v2 v2.10.6
 	github.com/sago35/koebiten v0.6.0
 	golang.org/x/image v0.47.0
 	tinygo.org/x/drivers v0.36.0
@@ -16,7 +16,7 @@ require (
 	github.com/ebitengine/gomobile v0.0.0-20260820040257-d11f821a26a6 // indirect
 	github.com/ebitengine/hideconsole v1.0.0 // indirect
 	github.com/ebitengine/oto/v3 v3.5.0 // indirect
-	github.com/ebitengine/purego v0.11.0 // indirect
+	github.com/ebitengine/purego v0.11.3 // indirect
 	github.com/go-text/typesetting v0.3.5 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/hajimehoshi/wasmserve v1.2.1 // indirect
